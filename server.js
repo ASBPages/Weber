@@ -8,20 +8,20 @@ const app = express();
 const server = createServer(app);
 const bare = createBareServer('/bare/');
 
-// --- 1. Basic認証 (Koyebの環境変数を使用) ---
+// --- Basic認証 (Koyebの環境変数 PROXY_USER / PROXY_PASSWORD を使用) ---
 const USER = process.env.PROXY_USER || 'admin';
-const PASS = process.env.PROXY_PASSWORD || '1220';
+const PASS = process.env.PROXY_PASSWORD || 'password123';
 
 app.use(basicAuth({
     users: { [USER]: PASS },
     challenge: true,
-    realm: 'Private Proxy'
+    realm: 'Secure Manga Proxy'
 }));
 
-// --- 2. 静的ファイルの配信 ---
+// --- 静的ファイルの配信 ---
 app.use(express.static(path.join(__dirname, 'public')));
 
-// --- 3. プロキシエンジンの処理 ---
+// --- プロキシエンジン (Bare Server) ---
 server.on('upgrade', (req, socket, head) => {
     if (bare.shouldRoute(req)) {
         bare.routeUpgrade(req, socket, head);
@@ -40,5 +40,5 @@ server.on('request', (req, res) => {
 
 const PORT = process.env.PORT || 8080;
 server.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+    console.log(`Manga Proxy running on port ${PORT}`);
 });
