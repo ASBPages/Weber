@@ -3,76 +3,69 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Speed Gateway</title>
-    <style>
-        body { background: #000; color: white; font-family: sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
-        .box { text-align: center; width: 90%; max-width: 500px; padding: 30px; background: #111; border-radius: 20px; border: 1px solid #333; }
-        input { width: 100%; padding: 15px; border-radius: 30px; border: 1px solid #444; background: #222; color: white; margin-bottom: 15px; box-sizing: border-box; text-align: center; }
-        button { width: 100%; padding: 15px; border-radius: 30px; border: none; background: #0070f3; color: white; cursor: pointer; font-weight: bold; }
-        .status { margin-top: 15px; font-size: 12px; color: #888; }
-    </style>
-    <!-- バンドルファイルのみ読み込む -->
+    <title>Gateway Final</title>
+    <!-- 必要なスクリプトを読み込む -->
     <script src="/uv/uv.bundle.js"></script>
+    <script src="/uv/uv.config.js"></script>
+    <style>
+        body { background: #000; color: #fff; font-family: sans-serif; height: 100vh; display: flex; align-items: center; justify-content: center; margin: 0; }
+        .box { width: 90%; max-width: 500px; text-align: center; padding: 40px; background: #111; border-radius: 20px; border: 1px solid #333; }
+        input { width: 100%; padding: 15px; border-radius: 30px; border: 1px solid #444; background: #222; color: #fff; margin-bottom: 20px; box-sizing: border-box; text-align: center; }
+        button { width: 100%; padding: 15px; border-radius: 30px; border: none; background: #444; color: #888; cursor: not-allowed; transition: 0.3s; font-weight: bold; }
+        button.ready { background: #0070f3; color: white; cursor: pointer; }
+        .status { margin-top: 15px; font-size: 12px; color: #666; }
+    </style>
 </head>
 <body>
     <div class="box">
-        <h2>GATEWAY <span style="color:#0070f3">SPEED</span></h2>
+        <h1 style="font-weight:200; margin-bottom:30px;">GATEWAY <span style="color:#0070f3">V5</span></h1>
         <form id="form">
-            <input id="url" placeholder="Search or URL" autocomplete="off">
-            <button id="btn">Connect</button>
+            <input id="url" placeholder="Loading Engine..." disabled autocomplete="off">
+            <button id="btn" type="submit">Initializing...</button>
         </form>
-        <div id="status" class="status">Ready</div>
+        <div id="status" class="status">Starting System...</div>
     </div>
 
     <script>
-        // ★ここが修正点：設定を直接書き込むことで読み込みエラーをゼロにする
-        self.__uv$config = {
-            prefix: '/uv/service/',
-            bare: '/bare/',
-            encodeUrl: Ultraviolet.codec.xor.encode,
-            decodeUrl: Ultraviolet.codec.xor.decode,
-            handler: '/uv/uv.handler.js',
-            client: '/uv/uv.client.js',
-            bundle: '/uv/uv.bundle.js',
-            config: '/uv/uv.config.js',
-            sw: '/uv/uv.sw.js',
-        };
-
         const form = document.getElementById('form');
         const input = document.getElementById('url');
+        const btn = document.getElementById('btn');
         const status = document.getElementById('status');
 
-        async function register() {
-            if (!navigator.serviceWorker) return;
+        async function init() {
+            if (!navigator.serviceWorker) {
+                status.innerText = "Error: Browser not supported.";
+                return;
+            }
+
             try {
+                // Service Workerを登録
                 await navigator.serviceWorker.register('/uv/uv.sw.js', { scope: __uv$config.prefix });
-                console.log("SW Registered");
+                
+                // 完了したらボタンを有効化
+                input.disabled = false;
+                input.placeholder = "Search or Enter URL";
+                btn.innerText = "Connect";
+                btn.classList.add('ready');
+                status.innerText = "System Ready. Encryption Active.";
             } catch (err) {
                 status.innerText = "Error: " + err.message;
             }
         }
-        register();
+        init();
 
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
+            if (!btn.classList.contains('ready')) return;
+
             let url = input.value.trim();
             if (!url) return;
 
             if (!url.includes('.') && !url.includes(':')) url = 'https://www.google.com/search?q=' + url;
             else if (!url.startsWith('http')) url = 'https://' + url;
 
-            status.innerText = "Loading...";
-            
-            // 登録確認して即ジャンプ
-            if (navigator.serviceWorker.controller) {
-                window.location.href = __uv$config.prefix + __uv$config.encodeUrl(url);
-            } else {
-                // 初回のみ少し待つ
-                await navigator.serviceWorker.register('/uv/uv.sw.js', { scope: __uv$config.prefix });
-                setTimeout(() => {
-                    window.location.href = __uv$config.prefix + __uv$config.encodeUrl(url);
-                }, 200);
-            }
+            status.innerText = "Connecting...";
+            window.location.href = __uv$config.prefix + __uv$config.encodeUrl(url);
         });
     </script>
 </body>

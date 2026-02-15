@@ -8,6 +8,7 @@ const app = express();
 const server = createServer(app);
 const bare = createBareServer('/bare/');
 
+// Basic認証 (ユーザー名: admin / パスワード: password123)
 app.use(basicAuth({
     users: { 'admin': 'password123' },
     challenge: true
@@ -15,6 +16,7 @@ app.use(basicAuth({
 
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Bare Serverのルーティング
 server.on('request', (req, res) => {
     if (bare.shouldRoute(req)) {
         bare.routeRequest(req, res);
@@ -31,4 +33,4 @@ server.on('upgrade', (req, socket, head) => {
     }
 });
 
-server.listen(process.env.PORT || 8080, () => console.log('Ready.'));
+server.listen(process.env.PORT || 8080, () => console.log('Server Running'));
