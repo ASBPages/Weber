@@ -1,15 +1,13 @@
 {
-  "name": "my-private-proxy",
+  "name": "weber-pro-v3",
   "version": "1.0.0",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
   "dependencies": {
-    "@tomphttp/bare-server-node": "^2.0.6",
-    "axios": "^1.6.8",
+    "@tomphttp/bare-server-node": "^2.0.1",
     "express": "^4.18.2",
-    "express-basic-auth": "^1.2.1",
-    "http-proxy": "^1.18.1"
+    "express-basic-auth": "^1.2.1"
   }
 }
