@@ -7,8 +7,8 @@ const app = express();
 const proxy = httpProxy.createProxyServer();
 
 // --- 1. Basic認証の設定（環境変数から読み込む） ---
-const USER = process.env.PROXY_USER || 'admin';
-const PASS = process.env.PROXY_PASSWORD || 'password123';
+const USER = process.env.PROXY_USER || 'ASB';
+const PASS = process.env.PROXY_PASSWORD || 'ASBowner';
 
 app.use(basicAuth({
     users: { [USER]: PASS },
