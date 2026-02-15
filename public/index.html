@@ -3,62 +3,70 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Fixed Gateway</title>
-    
-    <!-- ★ここが修正点：必ず config を bundle の後に読み込む -->
+    <title>Direct Gateway</title>
+    <!-- エンジン本体のみ読み込む -->
     <script src="/uv/uv.bundle.js"></script>
-    <script src="/uv/uv.config.js"></script>
-    
     <style>
         body { background: #000; color: #fff; font-family: sans-serif; height: 100vh; display: flex; align-items: center; justify-content: center; margin: 0; }
         .box { width: 90%; max-width: 500px; text-align: center; padding: 40px; background: #111; border-radius: 20px; border: 1px solid #333; }
         input { width: 100%; padding: 15px; border-radius: 30px; border: 1px solid #444; background: #222; color: #fff; margin-bottom: 20px; box-sizing: border-box; text-align: center; }
         button { width: 100%; padding: 15px; border-radius: 30px; border: none; background: #333; color: #666; cursor: not-allowed; transition: 0.3s; font-weight: bold; }
         button.ready { background: #0070f3; color: white; cursor: pointer; }
-        .status { margin-top: 15px; font-size: 12px; color: #888; }
+        .status { margin-top: 15px; font-size: 12px; color: #666; }
     </style>
 </head>
 <body>
     <div class="box">
-        <h1>GATEWAY <span style="color:#0070f3">FIXED</span></h1>
+        <h1 style="font-weight:200; margin-bottom:30px;">GATEWAY <span style="color:#0070f3">FINAL</span></h1>
         <form id="form">
             <input id="url" placeholder="Loading Engine..." disabled autocomplete="off">
             <button id="btn" type="submit">Initializing...</button>
         </form>
-        <div id="status" class="status">Checking System...</div>
+        <div id="status" class="status">System Check...</div>
     </div>
 
     <script>
+        // ★★★ ここが修正の核心 ★★★
+        // 外部ファイルを使わず、ここで直接定義する。これで「読み込みエラー」はあり得なくなる。
+        self.__uv$config = {
+            prefix: '/uv/service/',
+            bare: '/bare/',
+            encodeUrl: Ultraviolet.codec.xor.encode,
+            decodeUrl: Ultraviolet.codec.xor.decode,
+            handler: '/uv/uv.handler.js',
+            client: '/uv/uv.client.js',
+            bundle: '/uv/uv.bundle.js',
+            config: '/uv/uv.config.js',
+            sw: '/uv/uv.sw.js',
+        };
+
         const form = document.getElementById('form');
         const input = document.getElementById('url');
         const btn = document.getElementById('btn');
         const status = document.getElementById('status');
 
         async function init() {
-            // 設定ファイルが読み込まれているか確認
-            if (typeof __uv$config === 'undefined') {
-                status.innerText = "Error: Config not loaded. Refresh page.";
-                return;
-            }
-
             if (!navigator.serviceWorker) {
                 status.innerText = "Error: Browser not supported.";
                 return;
             }
 
             try {
+                // 設定は既に埋め込んであるので、即座にService Workerを登録
                 await navigator.serviceWorker.register('/uv/uv.sw.js', { scope: __uv$config.prefix });
                 
                 input.disabled = false;
                 input.placeholder = "Search or Enter URL";
                 btn.innerText = "Connect";
                 btn.classList.add('ready');
-                status.innerText = "System Ready.";
+                status.innerText = "System Ready. (Embedded Config)";
             } catch (err) {
-                status.innerText = "Error: " + err.message;
+                status.innerText = "SW Error: " + err.message;
             }
         }
-        init();
+        
+        // ページ読み込み完了時に実行
+        window.addEventListener('load', init);
 
         form.addEventListener('submit', async (e) => {
             e.preventDefault();

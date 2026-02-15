@@ -8,6 +8,7 @@ const app = express();
 const server = createServer(app);
 const bare = createBareServer('/bare/');
 
+// 認証 (admin / password123)
 app.use(basicAuth({
     users: { 'admin': 'password123' },
     challenge: true
@@ -15,6 +16,7 @@ app.use(basicAuth({
 
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Bare Server ルーティング
 server.on('request', (req, res) => {
     if (bare.shouldRoute(req)) {
         bare.routeRequest(req, res);
