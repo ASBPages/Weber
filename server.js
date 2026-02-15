@@ -1,17 +1,14 @@
 const express = require('express');
-const { createServer } = require('node:http');
-const { createBareServer } = require('@tomphttp/bare-server-node');
 const basicAuth = require('express-basic-auth');
+const httpProxy = require('http-proxy');
 const path = require('path');
 
 const app = express();
-const server = createServer(app);
-const bare = createBareServer('/bare/');
+const proxy = httpProxy.createProxyServer();
 
 // --- 1. Basic認証の設定 ---
-// RailwayのVariablesで設定するか、直接書き換えてください
-const USER = process.env.PROXY_USER || 'ABS';
-const PASS = process.env.PROXY_PASSWORD || 'ABSsena';
+const USER = process.env.PROXY_USER || 'ABS'; 
+const PASS = process.env.PROXY_PASSWORD || 'ABSOwer';
 
 app.use(basicAuth({
     users: { [USER]: PASS },
@@ -19,26 +16,29 @@ app.use(basicAuth({
     realm: 'Private Proxy Site'
 }));
 
-// --- 2. プロキシエンジンの処理 ---
-app.use(express.static(path.join(__dirname, 'public')));
+// --- 2. シンプルなリバースプロキシ処理 ---
+// ★ターゲットのURLをここに設定してください★
+// 動作テスト用の仮URLです。
+const TARGET_URL = 'https://example.com'; 
 
-server.on('upgrade', (req, socket, head) => {
-    if (bare.shouldRoute(req)) {
-        bare.routeUpgrade(req, socket, head);
-    } else {
-        socket.end();
-    }
+app.use((req, res, next) => {
+    // ターゲットURLへリクエストを転送する
+    proxy.web(req, res, { 
+        target: TARGET_URL,
+        changeOrigin: true, // ホスト名をターゲットのものに変更する
+        selfHandleResponse: false // サーバーからの応答をそのまま返す
+    });
 });
 
-server.on('request', (req, res) => {
-    if (bare.shouldRoute(req)) {
-        bare.routeRequest(req, res);
-    } else {
-        app(req, res);
-    }
+
+// エラーハンドリング (重要)
+proxy.on('error', (err, req, res) => {
+    console.error('Proxy Error:', err);
+    res.writeHead(500, { 'Content-Type': 'text/plain' });
+    res.end('Proxy service encountered an error.');
 });
 
 const PORT = process.env.PORT || 8080;
-server.listen(PORT, () => {
-    console.log(`Proxy is running on port ${PORT}`);
+app.listen(PORT, () => {
+    console.log(`Proxy Server started on port ${PORT}`);
 });
