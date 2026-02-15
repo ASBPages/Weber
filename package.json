@@ -1,15 +1,14 @@
 {
   "name": "my-private-proxy",
   "version": "1.0.0",
-  "description": "Private Proxy for iPad/PC",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "postinstall": "mkdir -p public/uv && curl -L https://raw.githubusercontent.com/titaniumnetwork-dev/Ultraviolet-Static/main/public/uv/uv.bundle.js -o public/uv/uv.bundle.js && curl -L https://raw.githubusercontent.com/titaniumnetwork-dev/Ultraviolet-Static/main/public/uv/uv.client.js -o public/uv/uv.client.js && curl -L https://raw.githubusercontent.com/titaniumnetwork-dev/Ultraviolet-Static/main/public/uv/uv.handler.js -o public/uv/uv.handler.js && curl -L https://raw.githubusercontent.com/titaniumnetwork-dev/Ultraviolet-Static/main/public/uv/uv.sw.js -o public/uv/uv.sw.js"
   },
   "dependencies": {
     "express": "^4.18.2",
     "express-basic-auth": "^1.2.1",
-    "@tomphttp/bare-server-node": "^2.0.1",
-    "ultraviolet-static": "latest"
+    "@tomphttp/bare-server-node": "^2.0.1"
   }
 }
