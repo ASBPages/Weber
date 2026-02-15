@@ -1,38 +1,38 @@
 <!DOCTYPE html>
-<html>
+<html lang="ja">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gateway</title>
     <style>
-        body { background:#000; color:#fff; font-family:sans-serif; height:100vh; display:flex; align-items:center; justify-content:center; margin:0; }
+        body { background:#050505; color:#fff; font-family:sans-serif; height:100vh; display:flex; align-items:center; justify-content:center; margin:0; }
         .card { width:90%; max-width:400px; padding:30px; background:#111; border-radius:20px; border:1px solid #333; text-align:center; }
-        input { width:100%; padding:15px; border-radius:10px; border:1px solid #444; background:#000; color:#fff; margin-bottom:15px; box-sizing:border-box; }
+        input { width:100%; padding:15px; border-radius:10px; border:1px solid #444; background:#000; color:#fff; margin-bottom:15px; box-sizing:border-box; font-size:16px; outline:none; }
         button { width:100%; padding:15px; border-radius:10px; border:none; background:#0070f3; color:#fff; font-weight:bold; cursor:pointer; }
-        button:disabled { background:#222; color:#555; }
+        button:disabled { background:#222; color:#555; cursor:not-allowed; }
     </style>
     <script src="/uv/uv.bundle.js"></script>
     <script src="/uv/uv.config.js"></script>
 </head>
 <body>
     <div class="card">
-        <h2>GATEWAY</h2>
+        <h2 style="font-weight:200; margin-bottom:20px;">ACCESS GATE</h2>
         <form id="g">
-            <input id="a" placeholder="Initializing..." disabled>
-            <button id="b" disabled>Wait...</button>
+            <input id="a" placeholder="Initializing..." disabled autocomplete="off">
+            <button id="b" disabled>WAIT</button>
         </form>
-        <p id="s" style="font-size:10px; color:#444; margin-top:10px;">Checking Engine...</p>
+        <div id="s" style="font-size:10px; color:#444; margin-top:10px;">Checking Engine...</div>
     </div>
     <script>
         const a=document.getElementById('a'),b=document.getElementById('b'),s=document.getElementById('s');
         async function init(){
             if('serviceWorker' in navigator){
-                try{
-                    await navigator.serviceWorker.register('/uv/uv.sw.js',{scope:__uv$config.prefix});
+                try {
+                    await navigator.serviceWorker.register('/uv/uv.sw.js', {scope: __uv$config.prefix});
                     a.disabled=false; a.placeholder="Enter URL or Search";
-                    b.disabled=false; b.innerText="Launch";
+                    b.disabled=false; b.innerText="LAUNCH";
                     s.innerText="Engine Ready";
-                }catch(e){s.innerText="Error: "+e.message;}
+                } catch(e) { s.innerText="Error: " + e.message; }
             }
         }
         init();

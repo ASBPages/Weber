@@ -7,6 +7,7 @@ const basicAuth = require('express-basic-auth');
 const app = express();
 const bare = createBareServer('/bare/');
 
+// 認証設定 (ID: admin / PW: password123)
 app.use(basicAuth({
     users: { 'admin': 'password123' },
     challenge: true
@@ -14,6 +15,7 @@ app.use(basicAuth({
 
 app.use(express.static(path.join(__dirname, 'public')));
 
+// ★KoyebのTLSエラーを回避するため、httpモジュールを直接使用
 const server = http.createServer();
 
 server.on('request', (req, res) => {
@@ -32,8 +34,8 @@ server.on('upgrade', (req, socket, head) => {
     }
 });
 
-// Koyebで最も安定する設定
+// Koyebは 0.0.0.0 での待受が必須
 const PORT = process.env.PORT || 8000;
 server.listen(PORT, '0.0.0.0', () => {
-    console.log(`Server started: port ${PORT}`);
+    console.log(`Server is listening on port ${PORT}`);
 });
