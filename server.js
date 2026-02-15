@@ -10,8 +10,8 @@ const bare = createBareServer('/bare/');
 
 // --- 1. Basic認証の設定 ---
 // RailwayのVariablesで設定するか、直接書き換えてください
-const USER = process.env.PROXY_USER || 'admin';
-const PASS = process.env.PROXY_PASSWORD || 'password123';
+const USER = process.env.PROXY_USER || 'ABS';
+const PASS = process.env.PROXY_PASSWORD || 'ABSsena';
 
 app.use(basicAuth({
     users: { [USER]: PASS },
