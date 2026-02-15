@@ -19,7 +19,7 @@ app.use(basicAuth({
 // --- 2. シンプルなリバースプロキシ処理 ---
 // ★ターゲットのURLをここに設定してください★
 // 動作テスト用の仮URLです。
-const TARGET_URL = 'https://example.com'; 
+const TARGET_URL = 'https://pixiv.net'; 
 
 app.use((req, res, next) => {
     // ターゲットURLへリクエストを転送する
