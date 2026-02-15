@@ -8,7 +8,6 @@ const app = express();
 const server = createServer(app);
 const bare = createBareServer('/bare/');
 
-// 認証設定 (admin / password123)
 app.use(basicAuth({
     users: { 'admin': 'password123' },
     challenge: true
@@ -16,7 +15,6 @@ app.use(basicAuth({
 
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Bare Server (重要: これがないとYouTubeは動きません)
 server.on('request', (req, res) => {
     if (bare.shouldRoute(req)) {
         bare.routeRequest(req, res);
@@ -33,5 +31,4 @@ server.on('upgrade', (req, socket, head) => {
     }
 });
 
-const PORT = process.env.PORT || 8080;
-server.listen(PORT, () => console.log(`Running on port ${PORT}`));
+server.listen(process.env.PORT || 8080, () => console.log('Ready.'));
