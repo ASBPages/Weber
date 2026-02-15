@@ -3,44 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Gateway V8</title>
-    <style>
-        body { background: #0d1117; color: #c9d1d9; font-family: sans-serif; height: 100vh; display: flex; align-items: center; justify-content: center; margin: 0; }
-        .box { width: 90%; max-width: 450px; text-align: center; padding: 30px; background: #161b22; border-radius: 15px; border: 1px solid #30363d; }
-        input { width: 100%; padding: 12px; border-radius: 6px; border: 1px solid #30363d; background: #0d1117; color: #fff; margin-bottom: 15px; box-sizing: border-box; text-align: center; }
-        button { width: 100%; padding: 12px; border-radius: 6px; border: none; background: #238636; color: #fff; cursor: pointer; font-weight: bold; transition: 0.2s; }
-        button:disabled { background: #21262d; color: #8b949e; cursor: not-allowed; }
-        button:hover:not(:disabled) { background: #2ea043; }
-        .status { margin-top: 15px; font-size: 12px; color: #8b949e; }
-    </style>
-    <!-- 公式ライブラリからバンドルを読み込む -->
+    <title>Final Gateway</title>
+    <!-- 読み込み順序を厳守 -->
     <script src="/uv/uv.bundle.js"></script>
     <script src="/uv/uv.config.js"></script>
+    <style>
+        body { background: #000; color: #fff; font-family: sans-serif; height: 100vh; display: flex; align-items: center; justify-content: center; margin: 0; }
+        .box { width: 90%; max-width: 500px; text-align: center; padding: 40px; background: #111; border-radius: 20px; border: 1px solid #333; }
+        input { width: 100%; padding: 15px; border-radius: 30px; border: 1px solid #444; background: #222; color: #fff; margin-bottom: 20px; box-sizing: border-box; text-align: center; }
+        button { width: 100%; padding: 15px; border-radius: 30px; border: none; background: #333; color: #666; cursor: not-allowed; transition: 0.3s; font-weight: bold; }
+        button.ready { background: #0070f3; color: white; cursor: pointer; }
+        .status { margin-top: 15px; font-size: 12px; color: #666; }
+    </style>
 </head>
 <body>
     <div class="box">
-        <h2 style="margin-top:0;">Secure Proxy</h2>
+        <h1 style="font-weight:200; margin-bottom:30px;">GATEWAY <span style="color:#0070f3">PRO</span></h1>
         <form id="form">
-            <input id="url" placeholder="Loading..." disabled autocomplete="off">
-            <button id="btn" type="submit" disabled>Initializing...</button>
+            <input id="url" placeholder="Loading System..." disabled autocomplete="off">
+            <button id="btn" type="submit">Initializing...</button>
         </form>
-        <div id="status" class="status">System Check...</div>
+        <div id="status" class="status">Starting Service Worker...</div>
     </div>
 
     <script>
-        // ★設定埋め込み（読み込みエラー回避）★
-        self.__uv$config = {
-            prefix: '/uv/service/',
-            bare: '/bare/',
-            encodeUrl: Ultraviolet.codec.xor.encode,
-            decodeUrl: Ultraviolet.codec.xor.decode,
-            handler: '/uv/uv.handler.js',
-            client: '/uv/uv.client.js',
-            bundle: '/uv/uv.bundle.js',
-            config: '/uv/uv.config.js',
-            sw: '/uv/uv.sw.js',
-        };
-
         const form = document.getElementById('form');
         const input = document.getElementById('url');
         const btn = document.getElementById('btn');
@@ -51,21 +37,26 @@
                 status.innerText = "Error: Browser not supported.";
                 return;
             }
+
             try {
                 await navigator.serviceWorker.register('/uv/uv.sw.js', { scope: __uv$config.prefix });
                 input.disabled = false;
                 input.placeholder = "Search or Enter URL";
-                btn.disabled = false;
                 btn.innerText = "Connect";
-                status.innerText = "Ready to connect.";
+                btn.classList.add('ready');
+                status.innerText = "System Ready. Encryption Active.";
             } catch (err) {
                 status.innerText = "Error: " + err.message;
             }
         }
-        init();
+        
+        // ページ読み込み完了時に実行
+        window.addEventListener('load', init);
 
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
+            if (!btn.classList.contains('ready')) return;
+
             let url = input.value.trim();
             if (!url) return;
 
