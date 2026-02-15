@@ -8,6 +8,7 @@ const app = express();
 const server = createServer(app);
 const bare = createBareServer('/bare/');
 
+// Basic認証 (admin / password123)
 app.use(basicAuth({
     users: { 'admin': 'password123' },
     challenge: true
@@ -31,4 +32,4 @@ server.on('upgrade', (req, socket, head) => {
     }
 });
 
-server.listen(process.env.PORT || 8080, () => console.log('Server Ready'));
+server.listen(process.env.PORT || 8080, () => console.log('Online'));

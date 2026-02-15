@@ -1,71 +1,61 @@
 <!DOCTYPE html>
-<html>
+<html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Final Gateway</title>
-    <!-- 読み込み順序を厳守 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gateway Pro</title>
+    <style>
+        body { background:#0a0a0a; color:#fff; font-family:sans-serif; height:100vh; display:flex; align-items:center; justify-content:center; margin:0; }
+        .card { width:90%; max-width:450px; text-align:center; padding:40px; border-radius:20px; background:#111; border:1px solid #333; box-shadow:0 10px 30px rgba(0,0,0,0.5); }
+        input { width:100%; padding:15px; border-radius:10px; border:1px solid #444; background:#222; color:#fff; margin-bottom:20px; box-sizing:border-box; text-align:center; font-size:16px; }
+        button { width:100%; padding:15px; border-radius:10px; border:none; background:#0070f3; color:#fff; font-weight:bold; font-size:16px; cursor:pointer; }
+        button:disabled { background:#333; color:#666; cursor:not-allowed; }
+        .loader { font-size:12px; color:#555; margin-top:15px; }
+    </style>
     <script src="/uv/uv.bundle.js"></script>
     <script src="/uv/uv.config.js"></script>
-    <style>
-        body { background: #000; color: #fff; font-family: sans-serif; height: 100vh; display: flex; align-items: center; justify-content: center; margin: 0; }
-        .box { width: 90%; max-width: 500px; text-align: center; padding: 40px; background: #111; border-radius: 20px; border: 1px solid #333; }
-        input { width: 100%; padding: 15px; border-radius: 30px; border: 1px solid #444; background: #222; color: #fff; margin-bottom: 20px; box-sizing: border-box; text-align: center; }
-        button { width: 100%; padding: 15px; border-radius: 30px; border: none; background: #333; color: #666; cursor: not-allowed; transition: 0.3s; font-weight: bold; }
-        button.ready { background: #0070f3; color: white; cursor: pointer; }
-        .status { margin-top: 15px; font-size: 12px; color: #666; }
-    </style>
 </head>
 <body>
-    <div class="box">
-        <h1 style="font-weight:200; margin-bottom:30px;">GATEWAY <span style="color:#0070f3">PRO</span></h1>
-        <form id="form">
-            <input id="url" placeholder="Loading System..." disabled autocomplete="off">
-            <button id="btn" type="submit">Initializing...</button>
+    <div class="card">
+        <h1 style="font-weight:200; margin-bottom:30px; letter-spacing:5px;">GATEWAY</h1>
+        <form id="f">
+            <input id="u" placeholder="URL or Search" disabled>
+            <button id="b" disabled>Loading...</button>
         </form>
-        <div id="status" class="status">Starting Service Worker...</div>
+        <div id="s" class="loader">Initializing Engine...</div>
     </div>
-
     <script>
-        const form = document.getElementById('form');
-        const input = document.getElementById('url');
-        const btn = document.getElementById('btn');
-        const status = document.getElementById('status');
+        const f = document.getElementById('f');
+        const u = document.getElementById('u');
+        const b = document.getElementById('b');
+        const s = document.getElementById('s');
 
         async function init() {
-            if (!navigator.serviceWorker) {
-                status.innerText = "Error: Browser not supported.";
-                return;
-            }
-
-            try {
-                await navigator.serviceWorker.register('/uv/uv.sw.js', { scope: __uv$config.prefix });
-                input.disabled = false;
-                input.placeholder = "Search or Enter URL";
-                btn.innerText = "Connect";
-                btn.classList.add('ready');
-                status.innerText = "System Ready. Encryption Active.";
-            } catch (err) {
-                status.innerText = "Error: " + err.message;
+            if ('serviceWorker' in navigator) {
+                try {
+                    await navigator.serviceWorker.register('/uv/uv.sw.js', { scope: __uv$config.prefix });
+                    u.disabled = false;
+                    b.innerText = "Connect";
+                    b.disabled = false;
+                    s.innerText = "Encryption Engine Active.";
+                } catch (e) {
+                    s.innerText = "Error: " + e.message;
+                }
             }
         }
-        
-        // ページ読み込み完了時に実行
-        window.addEventListener('load', init);
+        init();
 
-        form.addEventListener('submit', async (e) => {
+        f.onsubmit = async (e) => {
             e.preventDefault();
-            if (!btn.classList.contains('ready')) return;
-
-            let url = input.value.trim();
+            let url = u.value.trim();
             if (!url) return;
-
             if (!url.includes('.') && !url.includes(':')) url = 'https://www.google.com/search?q=' + url;
             else if (!url.startsWith('http')) url = 'https://' + url;
 
-            status.innerText = "Connecting...";
-            window.location.href = __uv$config.prefix + __uv$config.encodeUrl(url);
-        });
+            s.innerText = "Encrypting and connecting...";
+            // XOR暗号化してプロキシへ飛ばす（これでURLバーからyoutube等の文字が消える）
+            location.href = __uv$config.prefix + __uv$config.encodeUrl(url);
+        };
     </script>
 </body>
 </html>
