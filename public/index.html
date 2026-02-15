@@ -1,59 +1,62 @@
 <!DOCTYPE html>
-<html>
+<html lang="ja">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cloud Space</title>
+    <title>Infinity Proxy</title>
     <style>
-        body { background:#050505; color:#fff; font-family:sans-serif; height:100vh; display:flex; align-items:center; justify-content:center; margin:0; }
-        .card { width:90%; max-width:400px; padding:40px; background:#111; border-radius:24px; border:1px solid #222; text-align:center; }
-        input { width:100%; padding:15px; border-radius:10px; border:1px solid #333; background:#000; color:#fff; margin-bottom:20px; box-sizing:border-box; font-size:16px; outline:none; }
-        button { width:100%; padding:15px; border-radius:10px; border:none; background:#0070f3; color:#fff; font-weight:600; cursor:pointer; }
-        button:disabled { background:#222; color:#555; }
-        .status { margin-top:20px; font-size:12px; color:#444; }
+        body { background: #050505; color: #fff; font-family: -apple-system, sans-serif; height: 100vh; display: flex; align-items: center; justify-content: center; margin: 0; }
+        .container { width: 90%; max-width: 400px; padding: 40px; background: #111; border-radius: 24px; border: 1px solid #222; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.8); }
+        h2 { font-weight: 300; letter-spacing: 4px; margin-bottom: 30px; }
+        input { width: 100%; padding: 16px; border-radius: 12px; border: 1px solid #333; background: #000; color: #fff; margin-bottom: 20px; box-sizing: border-box; font-size: 16px; outline: none; transition: 0.3s; }
+        input:focus { border-color: #0070f3; }
+        button { width: 100%; padding: 16px; border-radius: 12px; border: none; background: #0070f3; color: #fff; font-weight: 600; cursor: pointer; transition: 0.2s; }
+        button:disabled { background: #222; color: #555; cursor: not-allowed; }
+        .status { margin-top: 20px; font-size: 11px; color: #444; text-transform: uppercase; letter-spacing: 1px; }
     </style>
-    <!-- 読み込み順序が重要 -->
-    <script src="/uv/uv.bundle.js" defer></script>
-    <script src="/uv/uv.config.js" defer></script>
+    <script src="/uv/uv.bundle.js"></script>
+    <script src="/uv/uv.config.js"></script>
 </head>
 <body>
-    <div class="card">
-        <h2 style="font-weight:400; margin-bottom:30px;">Web Access</h2>
+    <div class="container">
+        <h2>GATEWAY</h2>
         <form id="gate">
-            <input id="addr" placeholder="Loading Engine..." disabled>
-            <button id="go" disabled>Wait...</button>
+            <input id="addr" placeholder="Initializing Engine..." disabled autocomplete="off">
+            <button id="go" disabled>WAIT</button>
         </form>
-        <div id="msg" class="status">System Initializing...</div>
+        <div id="msg" class="status">System starting...</div>
     </div>
     <script>
-        window.addEventListener('load', async () => {
-            const gate = document.getElementById('gate');
-            const addr = document.getElementById('addr');
-            const go = document.getElementById('go');
-            const msg = document.getElementById('msg');
+        const addr = document.getElementById('addr');
+        const go = document.getElementById('go');
+        const msg = document.getElementById('msg');
 
+        async function init() {
             if ('serviceWorker' in navigator) {
                 try {
                     await navigator.serviceWorker.register('/uv/uv.sw.js', { scope: __uv$config.prefix });
                     addr.disabled = false;
-                    addr.placeholder = "Enter URL or Search";
-                    go.innerText = "Connect";
+                    addr.placeholder = "Search or Enter URL";
+                    go.innerText = "LAUNCH";
                     go.disabled = false;
-                    msg.innerText = "System Online";
+                    msg.innerText = "Engine Online";
                 } catch (e) {
                     msg.innerText = "Engine Error: " + e.message;
                 }
             }
+        }
+        init();
+
+        document.getElementById('gate').onsubmit = (e) => {
+            e.preventDefault();
+            let url = addr.value.trim();
+            if (!url) return;
+            if (!url.includes('.') && !url.includes(':')) url = 'https://www.google.com/search?q=' + encodeURIComponent(url);
+            else if (!url.startsWith('http')) url = 'https://' + url;
             
-            gate.onsubmit = (e) => {
-                e.preventDefault();
-                let url = addr.value.trim();
-                if (!url) return;
-                if (!url.includes('.') && !url.includes(':')) url = 'https://www.google.com/search?q=' + encodeURIComponent(url);
-                else if (!url.startsWith('http')) url = 'https://' + url;
-                location.href = __uv$config.prefix + __uv$config.encodeUrl(url);
-            };
-        });
+            msg.innerText = "Bypassing restrictions...";
+            location.href = __uv$config.prefix + __uv$config.encodeUrl(url);
+        };
     </script>
 </body>
 </html>

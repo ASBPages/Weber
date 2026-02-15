@@ -1,14 +1,13 @@
+const http = require('node:http');
+const path = require('node:path');
 const express = require('express');
-const { createServer } = require('node:http');
 const { createBareServer } = require('@tomphttp/bare-server-node');
 const basicAuth = require('express-basic-auth');
-const path = require('path');
 
 const app = express();
-const server = createServer();
 const bare = createBareServer('/bare/');
 
-// Basic認証 (ID: admin / PW: password123)
+// 認証 (admin / password123)
 app.use(basicAuth({
     users: { 'admin': 'password123' },
     challenge: true
@@ -16,8 +15,7 @@ app.use(basicAuth({
 
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Koyebのヘルスチェック用
-app.get('/health', (req, res) => res.status(200).send('OK'));
+const server = http.createServer();
 
 server.on('request', (req, res) => {
     if (bare.shouldRoute(req)) {
@@ -35,8 +33,8 @@ server.on('upgrade', (req, socket, head) => {
     }
 });
 
-// ★KoyebでのTLSエラー回避の鍵: ポート0.0.0.0でHTTPとして待機
-const PORT = process.env.PORT || 8080;
+// Koyeb の要求するポートに 0.0.0.0 で確実にバインド
+const PORT = process.env.PORT || 8000;
 server.listen(PORT, '0.0.0.0', () => {
-    console.log(`Server started on port ${PORT}`);
+    console.log(`Server is listening on port ${PORT}`);
 });
