@@ -1,13 +1,13 @@
 {
-  "name": "weber-ultimate",
+  "name": "weber-robust-proxy",
   "version": "1.0.0",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
   "dependencies": {
-    "@tomphttp/bare-server-node": "^2.0.1",
     "express": "^4.18.2",
-    "express-basic-auth": "^1.2.1"
+    "express-basic-auth": "^1.2.1",
+    "axios": "^1.6.8"
   }
 }
