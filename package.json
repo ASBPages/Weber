@@ -6,9 +6,10 @@
     "start": "node server.js"
   },
   "dependencies": {
+    "@tomphttp/bare-server-node": "^2.0.6",
+    "axios": "^1.6.8",
     "express": "^4.18.2",
     "express-basic-auth": "^1.2.1",
-    "http-proxy": "^1.18.1",
-    "axios": "^1.6.8"
+    "http-proxy": "^1.18.1"
   }
 }
