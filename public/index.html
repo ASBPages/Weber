@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Private Gate</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background: #121212; color: white; }
+        input { padding: 15px; width: 80%; max-width: 500px; border-radius: 10px; border: none; margin-bottom: 20px; font-size: 16px; }
+        button { padding: 10px 20px; border-radius: 5px; border: none; background: #007bff; color: white; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>Private Proxy</h1>
+    <form id="proxy-form">
+        <input type="text" id="url-input" placeholder="https://google.com" required>
+        <button type="submit">Go</button>
+    </form>
+
+    <script src="/uv/uv.bundle.js"></script>
+    <script src="/uv/uv.config.js"></script>
+    <script>
+        const form = document.getElementById('proxy-form');
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const url = document.getElementById('url-input').value;
+            // Ultravioletのエンコード処理をして転送
+            window.location.href = "/uv/service/" + btoa(url); 
+        });
+    </script>
+</body>
+</html>
