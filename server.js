@@ -8,25 +8,15 @@ const app = express();
 const server = createServer(app);
 const bare = createBareServer('/bare/');
 
-// 認証設定 (ユーザー名: admin / パスワード: password123)
+// 認証設定 (admin / password123)
 app.use(basicAuth({
     users: { 'admin': 'password123' },
     challenge: true
 }));
 
-// 静的ファイルの配信
 app.use(express.static(path.join(__dirname, 'public')));
 
-// UVエンジン (Bare Server) のルーティング
-app.use('/bare/', (req, res, next) => {
-    if (bare.shouldRoute(req)) {
-        bare.routeRequest(req, res);
-    } else {
-        next();
-    }
-});
-
-// サーバーのエラー処理
+// Bare Server (重要: これがないとYouTubeは動きません)
 server.on('request', (req, res) => {
     if (bare.shouldRoute(req)) {
         bare.routeRequest(req, res);
@@ -44,6 +34,4 @@ server.on('upgrade', (req, socket, head) => {
 });
 
 const PORT = process.env.PORT || 8080;
-server.listen(PORT, () => {
-    console.log('Running on port ' + PORT);
-});
+server.listen(PORT, () => console.log(`Running on port ${PORT}`));
