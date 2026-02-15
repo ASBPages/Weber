@@ -1,18 +1,24 @@
-import { createBareServer } from '@tomphttp/bare-server-node';
-import express from 'express';
-import { createServer } from 'node:http'; // ★重要: httpsではなくhttpを使う
-import { join } from 'node:path';
-import { fileURLToPath } from 'node:url';
+const express = require('express');
+const { createServer } = require('node:http');
+const { createBareServer } = require('@tomphttp/bare-server-node');
+const basicAuth = require('express-basic-auth');
+const path = require('path');
 
-const __dirname = fileURLToPath(new URL('.', import.meta.url));
 const app = express();
-const server = createServer(); // Expressではなく直接HTTPサーバーを作る
+const server = createServer();
 const bare = createBareServer('/bare/');
 
-// 静的ファイルの配信
-app.use(express.static(join(__dirname, 'public')));
+// Basic認証 (ID: admin / PW: password123)
+app.use(basicAuth({
+    users: { 'admin': 'password123' },
+    challenge: true
+}));
 
-// サーバーのリクエスト処理（Bare Server優先）
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Koyebのヘルスチェック用
+app.get('/health', (req, res) => res.status(200).send('OK'));
+
 server.on('request', (req, res) => {
     if (bare.shouldRoute(req)) {
         bare.routeRequest(req, res);
@@ -21,7 +27,6 @@ server.on('request', (req, res) => {
     }
 });
 
-// WebSocket処理（動画再生に必須）
 server.on('upgrade', (req, socket, head) => {
     if (bare.shouldRoute(req)) {
         bare.routeUpgrade(req, socket, head);
@@ -30,8 +35,8 @@ server.on('upgrade', (req, socket, head) => {
     }
 });
 
-// ★Koyeb推奨ポート 8000 で、0.0.0.0（全開放）で待機する
-const PORT = parseInt(process.env.PORT || '8000');
+// ★KoyebでのTLSエラー回避の鍵: ポート0.0.0.0でHTTPとして待機
+const PORT = process.env.PORT || 8080;
 server.listen(PORT, '0.0.0.0', () => {
-    console.log(`Server running on port ${PORT}`);
+    console.log(`Server started on port ${PORT}`);
 });

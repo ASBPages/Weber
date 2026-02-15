@@ -2,58 +2,58 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Simple Gateway</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cloud Space</title>
     <style>
-        body { background: #000; color: #fff; font-family: sans-serif; height: 100vh; display: flex; align-items: center; justify-content: center; margin: 0; }
-        .box { width: 90%; max-width: 400px; text-align: center; }
-        input { width: 100%; padding: 12px; border-radius: 5px; border: 1px solid #333; background: #111; color: #fff; margin-bottom: 10px; box-sizing: border-box; text-align: center; }
-        button { width: 100%; padding: 12px; border-radius: 5px; border: none; background: #0070f3; color: white; cursor: pointer; }
-        button:disabled { background: #333; cursor: not-allowed; }
-        .status { margin-top: 15px; font-size: 12px; color: #666; }
+        body { background:#050505; color:#fff; font-family:sans-serif; height:100vh; display:flex; align-items:center; justify-content:center; margin:0; }
+        .card { width:90%; max-width:400px; padding:40px; background:#111; border-radius:24px; border:1px solid #222; text-align:center; }
+        input { width:100%; padding:15px; border-radius:10px; border:1px solid #333; background:#000; color:#fff; margin-bottom:20px; box-sizing:border-box; font-size:16px; outline:none; }
+        button { width:100%; padding:15px; border-radius:10px; border:none; background:#0070f3; color:#fff; font-weight:600; cursor:pointer; }
+        button:disabled { background:#222; color:#555; }
+        .status { margin-top:20px; font-size:12px; color:#444; }
     </style>
-    <script src="/uv/uv.bundle.js"></script>
-    <script src="/uv/uv.config.js"></script>
+    <!-- 読み込み順序が重要 -->
+    <script src="/uv/uv.bundle.js" defer></script>
+    <script src="/uv/uv.config.js" defer></script>
 </head>
 <body>
-    <div class="box">
-        <h2 style="font-weight:200;">PROXY</h2>
-        <form id="form">
-            <input id="url" placeholder="Connecting..." disabled>
-            <button id="btn" disabled>Wait...</button>
+    <div class="card">
+        <h2 style="font-weight:400; margin-bottom:30px;">Web Access</h2>
+        <form id="gate">
+            <input id="addr" placeholder="Loading Engine..." disabled>
+            <button id="go" disabled>Wait...</button>
         </form>
-        <div id="status" class="status">Starting...</div>
+        <div id="msg" class="status">System Initializing...</div>
     </div>
     <script>
-        const form = document.getElementById('form');
-        const input = document.getElementById('url');
-        const btn = document.getElementById('btn');
-        const status = document.getElementById('status');
+        window.addEventListener('load', async () => {
+            const gate = document.getElementById('gate');
+            const addr = document.getElementById('addr');
+            const go = document.getElementById('go');
+            const msg = document.getElementById('msg');
 
-        async function init() {
             if ('serviceWorker' in navigator) {
                 try {
                     await navigator.serviceWorker.register('/uv/uv.sw.js', { scope: __uv$config.prefix });
-                    input.disabled = false;
-                    input.placeholder = "URL or Search";
-                    btn.disabled = false;
-                    btn.innerText = "Go";
-                    status.innerText = "Ready.";
+                    addr.disabled = false;
+                    addr.placeholder = "Enter URL or Search";
+                    go.innerText = "Connect";
+                    go.disabled = false;
+                    msg.innerText = "System Online";
                 } catch (e) {
-                    status.innerText = "Error: " + e.message;
+                    msg.innerText = "Engine Error: " + e.message;
                 }
             }
-        }
-        init();
-
-        form.onsubmit = async (e) => {
-            e.preventDefault();
-            let url = input.value.trim();
-            if (!url) return;
-            if (!url.includes('.') && !url.includes(':')) url = 'https://www.google.com/search?q=' + url;
-            else if (!url.startsWith('http')) url = 'https://' + url;
-            window.location.href = __uv$config.prefix + __uv$config.encodeUrl(url);
-        };
+            
+            gate.onsubmit = (e) => {
+                e.preventDefault();
+                let url = addr.value.trim();
+                if (!url) return;
+                if (!url.includes('.') && !url.includes(':')) url = 'https://www.google.com/search?q=' + encodeURIComponent(url);
+                else if (!url.startsWith('http')) url = 'https://' + url;
+                location.href = __uv$config.prefix + __uv$config.encodeUrl(url);
+            };
+        });
     </script>
 </body>
 </html>
