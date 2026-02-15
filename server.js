@@ -6,9 +6,9 @@ const path = require('path');
 const app = express();
 const proxy = httpProxy.createProxyServer();
 
-// --- 1. Basic認証の設定 ---
-const USER = process.env.PROXY_USER || 'ABS'; 
-const PASS = process.env.PROXY_PASSWORD || 'ABSOwer';
+// --- 1. Basic認証の設定（環境変数から読み込む） ---
+const USER = process.env.PROXY_USER || 'admin';
+const PASS = process.env.PROXY_PASSWORD || 'password123';
 
 app.use(basicAuth({
     users: { [USER]: PASS },
@@ -16,20 +16,23 @@ app.use(basicAuth({
     realm: 'Private Proxy Site'
 }));
 
-// --- 2. シンプルなリバースプロキシ処理 ---
-// ★ターゲットのURLをここに設定してください★
-// 動作テスト用の仮URLです。
-const TARGET_URL = 'https://pixiv.net'; 
+// publicフォルダを静的ファイルとして提供
+app.use(express.static(path.join(__dirname, 'public')));
 
-app.use((req, res, next) => {
+// --- 2. リバースプロキシ処理 ★ここを変更★ ---
+app.get('/proxy', (req, res) => {
+    const targetUrl = req.query.url; // 入力されたURLを取得
+    if (!targetUrl) {
+        return res.status(400).send('URLパラメータがありません');
+    }
+
     // ターゲットURLへリクエストを転送する
-    proxy.web(req, res, { 
-        target: TARGET_URL,
+    proxy.web(req, res, {
+        target: targetUrl, // 入力されたURLをターゲットにする
         changeOrigin: true, // ホスト名をターゲットのものに変更する
         selfHandleResponse: false // サーバーからの応答をそのまま返す
     });
 });
-
 
 // エラーハンドリング (重要)
 proxy.on('error', (err, req, res) => {
@@ -38,7 +41,7 @@ proxy.on('error', (err, req, res) => {
     res.end('Proxy service encountered an error.');
 });
 
-const PORT = process.env.PORT || 8080;
+const PORT = process.env.PORT || 8080; // ポートを8080に設定
 app.listen(PORT, () => {
     console.log(`Proxy Server started on port ${PORT}`);
 });
