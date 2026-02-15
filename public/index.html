@@ -2,67 +2,80 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Infinity Gateway</title>
+    <title>HighSpeed Gateway</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <style>
-        body { margin:0; height:100vh; display:flex; justify-content:center; align-items:center; font-family:'Segoe UI',sans-serif; background:#0a0a0a; color:#fff; overflow:hidden; }
-        .glass { background:rgba(255,255,255,0.05); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); padding:50px; border-radius:30px; border:1px solid rgba(255,255,255,0.1); width:90%; max-width:500px; text-align:center; box-shadow:0 20px 50px rgba(0,0,0,0.5); }
-        h1 { font-weight:200; letter-spacing:8px; margin-bottom:40px; text-transform:uppercase; background:linear-gradient(to right, #fff, #666); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
-        .box { position:relative; width:100%; }
-        input { width:100%; padding:18px 25px; box-sizing:border-box; border-radius:50px; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.3); color:#fff; font-size:16px; outline:none; transition:0.3s; }
-        input:focus { border-color:#00d2ff; box-shadow:0 0 20px rgba(0,210,255,0.4); }
-        .btn { position:absolute; right:8px; top:8px; bottom:8px; width:45px; border-radius:50%; border:none; background:linear-gradient(45deg,#00d2ff,#3a7bd5); color:#fff; cursor:pointer; font-size:20px; transition:0.3s; }
-        .btn:hover { transform:scale(1.1); box-shadow:0 0 15px #00d2ff; }
-        .status { margin-top:20px; font-size:12px; color:#555; }
-    </style>
     <script src="/uv/uv.bundle.js"></script>
     <script src="/uv/uv.config.js"></script>
+    <style>
+        body { background: #111; color: #fff; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        .container { background: rgba(255,255,255,0.1); padding: 40px; border-radius: 20px; text-align: center; width: 90%; max-width: 500px; box-shadow: 0 0 50px rgba(0,0,0,0.5); }
+        input { width: 100%; padding: 15px; border-radius: 30px; border: none; margin-bottom: 20px; font-size: 16px; outline: none; text-align: center; }
+        button { background: #007bff; color: white; border: none; padding: 15px 30px; border-radius: 30px; font-size: 16px; cursor: pointer; transition: 0.3s; width: 100%; }
+        button:hover { background: #0056b3; transform: scale(1.05); }
+        .status { margin-top: 15px; font-size: 12px; color: #aaa; }
+        .quick { margin-top: 20px; display: flex; gap: 10px; justify-content: center; }
+        .tag { background: #333; padding: 5px 15px; border-radius: 15px; font-size: 12px; cursor: pointer; }
+    </style>
 </head>
 <body>
-    <div class="glass">
-        <h1>Gateway</h1>
-        <form id="p-form">
-            <div class="box">
-                <input type="text" id="p-input" placeholder="URL or Search..." autocomplete="off">
-                <button type="submit" class="btn">➜</button>
-            </div>
+    <div class="container">
+        <h2 style="margin-bottom:30px; letter-spacing:2px;">GATEWAY V3</h2>
+        <form id="form">
+            <input id="url" placeholder="Search or Enter URL" autocomplete="off">
+            <button type="submit">Connect</button>
         </form>
-        <div id="status" class="status">Initializing Engine...</div>
+        <div id="status" class="status">System Ready</div>
+        <div class="quick">
+            <span class="tag" onclick="go('https://youtube.com')">YouTube</span>
+            <span class="tag" onclick="go('https://google.com')">Google</span>
+            <span class="tag" onclick="go('https://discord.com')">Discord</span>
+        </div>
     </div>
+
     <script>
-        const form = document.getElementById('p-form');
-        const input = document.getElementById('p-input');
+        const form = document.getElementById('form');
+        const input = document.getElementById('url');
         const status = document.getElementById('status');
 
-        // Service Workerの登録
-        async function init() {
-            if ('serviceWorker' in navigator) {
-                try {
-                    await navigator.serviceWorker.register('/uv/uv.sw.js', { scope: __uv$config.prefix });
-                    status.innerText = "Engine Ready. Encryption Active.";
-                } catch (e) {
-                    status.innerText = "Engine Error. Please refresh.";
-                }
+        async function registerSW() {
+            if (!navigator.serviceWorker) {
+                status.innerText = "Error: Service Worker not supported.";
+                return;
+            }
+            try {
+                await navigator.serviceWorker.register('/uv/uv.sw.js', { scope: __uv$config.prefix });
+                status.innerText = "Engine Connected. Ready.";
+            } catch (err) {
+                status.innerText = "Engine Failed: " + err.message;
             }
         }
-        init();
+        registerSW();
 
-        form.onsubmit = async (e) => {
+        function go(url) {
+            input.value = url;
+            process(url);
+        }
+
+        form.addEventListener('submit', (e) => {
             e.preventDefault();
-            const url = input.value.trim();
+            process(input.value.trim());
+        });
+
+        function process(url) {
             if (!url) return;
+            status.innerText = "Connecting to " + url + "...";
             
-            let target = url;
-            if (!url.includes('.')) {
-                target = 'https://www.google.com/search?q=' + encodeURIComponent(url);
+            if (!url.includes('.') && !url.includes(':')) {
+                url = 'https://www.google.com/search?q=' + encodeURIComponent(url);
             } else if (!url.startsWith('http')) {
-                target = 'https://' + url;
+                url = 'https://' + url;
             }
 
-            status.innerText = "Bypassing restrictions...";
-            // XOR暗号化してジャンプ
-            location.href = __uv$config.prefix + __uv$config.encodeUrl(target);
-        };
+            // 遅延を防ぐため、少し待ってから遷移
+            setTimeout(() => {
+                window.location.href = __uv$config.prefix + __uv$config.encodeUrl(url);
+            }, 500);
+        }
     </script>
 </body>
 </html>
