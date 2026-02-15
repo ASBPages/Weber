@@ -1,0 +1,15 @@
+{
+  "name": "my-private-proxy",
+  "version": "1.0.0",
+  "description": "Private Proxy for iPad/PC",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "express-basic-auth": "^1.2.1",
+    "@tomphttp/bare-server-node": "^2.0.1",
+    "ultraviolet-static": "latest"
+  }
+}
