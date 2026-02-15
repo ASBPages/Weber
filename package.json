@@ -1,6 +1,6 @@
 {
-  "name": "final-weber-v8",
-  "version": "8.0.0",
+  "name": "weber-v9",
+  "version": "9.0.0",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
